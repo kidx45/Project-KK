@@ -6,16 +6,16 @@ import (
 
 	"github.com/stretchr/testify/require"
 	sqlc "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
-	
+	utils "github.com/kidx45/Project-KK/Backend-Team/utils"
 )
 
-func TestCreateUser(t *testing.T) {
+func createRandomUser(t *testing.T) sqlc.User {
 	arg := sqlc.CreateUserParams{
-		Username: "kidx45",
-		HashedPassword: "some_hashed_password",
-		Email: "some_email@gmail.com",
-		FullName: "some_full_name",
-		PhoneNumber: "0909090909",
+		Username: utils.RandomUserName(),
+		HashedPassword: utils.RandomPassword(),
+		Email: utils.RandomEmail(),
+		FullName: utils.RandomFullName(),
+		PhoneNumber: utils.RandomPhoneNumber(),
 	}
 	
 	user, err := testQueries.CreateUser(context.Background(), arg)
@@ -24,4 +24,9 @@ func TestCreateUser(t *testing.T) {
 	require.Equal(t, arg.Username, user.Username)
 	require.Equal(t, arg.HashedPassword, user.HashedPassword)
 	require.Equal(t, arg.Email, user.Email)
+	return user
+}
+		
+func TestCreateUser(t *testing.T) {
+	createRandomUser(t)
 }
