@@ -4,6 +4,9 @@ CREATE TABLE "users" (
   "hashed_password" varchar NOT NULL,
   "full_name" varchar NOT NULL,
   "email" varchar UNIQUE NOT NULL,
+  "phone_number" varchar UNIQUE NOT NULL,
+  "is_email_verified" boolean NOT NULL DEFAULT false,
+  "is_phone_number_verified" boolean NOT NULL DEFAULT false,
   "password_changed_at" timestamp NOT NULL DEFAULT (now()),
   "created_at" timestamp NOT NULL DEFAULT (now())
 );

@@ -32,11 +32,14 @@ type Transfer struct {
 }
 
 type User struct {
-	ID                int64     `json:"id"`
-	Username          string    `json:"username"`
-	HashedPassword    string    `json:"hashedPassword"`
-	FullName          string    `json:"fullName"`
-	Email             string    `json:"email"`
-	PasswordChangedAt time.Time `json:"passwordChangedAt"`
-	CreatedAt         time.Time `json:"createdAt"`
+	ID                    int64     `json:"id"`
+	Username              string    `json:"username"`
+	HashedPassword        string    `json:"hashedPassword"`
+	FullName              string    `json:"fullName"`
+	Email                 string    `json:"email"`
+	PhoneNumber           string    `json:"phoneNumber"`
+	IsEmailVerified       bool      `json:"isEmailVerified"`
+	IsPhoneNumberVerified bool      `json:"isPhoneNumberVerified"`
+	PasswordChangedAt     time.Time `json:"passwordChangedAt"`
+	CreatedAt             time.Time `json:"createdAt"`
 }
