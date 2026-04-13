@@ -8,16 +8,18 @@ import (
 
 	_ "github.com/lib/pq"
 	sqlc "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
-
+	utils "github.com/kidx45/Project-KK/Backend-Team/utils"
 )
-
-const driverName = "postgres"
-const dataSourceName = "postgresql://root:secret@localhost:5433/Project_KK?sslmode=disable"
 
 var testQueries *sqlc.Queries
 
 func TestMain(m *testing.M) {
-	conn, err := sql.Open(driverName, dataSourceName)
+	config, err := utils.LoadEnv()
+	if err != nil {
+		log.Fatal("cannot load env:", err)
+	}
+
+	conn, err := sql.Open(config.DB_DRIVER_NAME, config.DB_URL)
 
 	if err != nil {
 		log.Fatal("cannot connect to the database:", err)

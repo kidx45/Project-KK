@@ -1,2 +1,2 @@
-.env
-notes.md
+.env.local.development
+.env.local.production
