@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 type Store struct {
-	*Queries
+	*Queries //composition
 	db *sql.DB
 }
 
@@ -54,7 +55,10 @@ func (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferT
 	err := s.execTx(ctx, func(q *Queries) error {
 
 		var err error
+		// "Hey Context, give me the Value attached to the txKey label"
+		myName := ctx.Value(txKey) 
 
+		log.Printf("%s is doing a transfer",myName)
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
 			FromAccountID: arg.FromAccountID,
 			ToAccountID: arg.ToAccountID,

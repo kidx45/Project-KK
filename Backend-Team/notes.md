@@ -85,7 +85,7 @@ When testing an integration with a database, it is best to use a test database t
   Key Function: m.Run(). This is the big button that starts ALL the tests in that package.
 - **`Testing.T`** - It handles a single, specific test. It is mainly used for checking logic, assertions, and reporting errors for one specific piece of code.
 
-## Database Transaction
+## 📑 Database Transaction
 
 It is a single unit of work involving multiple operation for executing a specific operation such in the case of our project, it may be to transfer money which requires getting and retrieving the accounts storing the entries from both accounts and storing the transfer of the money while dealing with logic. Reasons for its need are:
 
@@ -93,8 +93,23 @@ It is a single unit of work involving multiple operation for executing a specifi
 - provide isolation between programs that access the DB
 
 This is done to satisfy the ACID property
+
+## 🛣️ Go Routine, channels and Context passing for debuging
+### Go Routine
+Go Rountine is a property found in golang that allows us to simulate real world traffic and when they hit the same db at the same time which is very useful in tests which will allow us how or db is accessed and preventes deadlocking in the future. It is mainly used in the HTTP layer if needed explicit definition but frameworks like Gin Framework and chi Framework automatically have that so there is no need to specify the go func().
+
+### Channels
+Whenever the go routine is used, it run in its own background outside of function it lives in hence the function may finish before the db and we won't be able to read the result. So channels act like a pipline that allows us to connect the functiona and go routine passing data that is needed and later accessed using the arrow symbol
+
+## Context
+It is basically a package passed around function to function using for debuging and passing data without the needed to change the parameters of our fucntions that we are passing it into. In a context, we need a key inorder to passing and get the value we silently passed into the function and passsing an argument may cause a collision hence we use the struct
+
 ### Usage Tips
 
 - **Comments**: Must follow an exact format: `-- name: <method_name> :<return_type>`.
   - _Example:_ `-- name: GetAccount :one`
   - _Note:_ `--name` (without space) will not work.
+
+- **Composition or Struct Embedding**: inheritance in Golang, instead of using `extends` keyword, we use embedding, by adding our custom struct inside another struct which is our Queries. This allows us to inherit methods from the embedded struct.
+
+
