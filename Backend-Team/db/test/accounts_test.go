@@ -28,3 +28,14 @@ func createRandomAccount(t *testing.T) sqlc.Account {
 func TestCreateAccount(t *testing.T) {
 	createRandomAccount(t)
 }
+
+func TestGetAccount(t *testing.T) {
+	account := createRandomAccount(t)
+	accountGot,err := testQueries.GetAccountByUsername(context.Background(),account.Username)
+	_,err2 := testQueries.GetAccountById(context.Background(),account.ID + 1)
+	require.Equal(t,accountGot.Username,account.Username)
+	require.Equal(t,account.Balance,accountGot.Balance)
+	require.NoError(t,err)
+	require.Error(t,err2)
+}
+

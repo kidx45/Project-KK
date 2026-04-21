@@ -44,13 +44,49 @@ func (q *Queries) DeleteAccount(ctx context.Context, username string) error {
 	return err
 }
 
-const getAccount = `-- name: GetAccount :one
+const getAccountById = `-- name: GetAccountById :one
+SELECT id, username, balance, currency, created_at FROM accounts
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetAccountById(ctx context.Context, id int64) (Account, error) {
+	row := q.queryRow(ctx, q.getAccountByIdStmt, getAccountById, id)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getAccountByIdForUpdate = `-- name: GetAccountByIdForUpdate :one
+SELECT id, username, balance, currency, created_at FROM accounts
+WHERE id = $1 LIMIT 1 FOR NO KEY UPDATE
+`
+
+func (q *Queries) GetAccountByIdForUpdate(ctx context.Context, id int64) (Account, error) {
+	row := q.queryRow(ctx, q.getAccountByIdForUpdateStmt, getAccountByIdForUpdate, id)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getAccountByUsername = `-- name: GetAccountByUsername :one
 SELECT id, username, balance, currency, created_at FROM accounts 
 WHERE username = $1 LIMIT 1
 `
 
-func (q *Queries) GetAccount(ctx context.Context, username string) (Account, error) {
-	row := q.queryRow(ctx, q.getAccountStmt, getAccount, username)
+func (q *Queries) GetAccountByUsername(ctx context.Context, username string) (Account, error) {
+	row := q.queryRow(ctx, q.getAccountByUsernameStmt, getAccountByUsername, username)
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -101,20 +137,45 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 	return items, nil
 }
 
-const updateAccount = `-- name: UpdateAccount :one
+const updateAccountById = `-- name: UpdateAccountById :one
+UPDATE accounts
+SET balance = $2
+WHERE id = $1
+RETURNING id, username, balance, currency, created_at
+`
+
+type UpdateAccountByIdParams struct {
+	ID      int64 `json:"id"`
+	Balance int64 `json:"balance"`
+}
+
+func (q *Queries) UpdateAccountById(ctx context.Context, arg UpdateAccountByIdParams) (Account, error) {
+	row := q.queryRow(ctx, q.updateAccountByIdStmt, updateAccountById, arg.ID, arg.Balance)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateAccountByUsername = `-- name: UpdateAccountByUsername :one
 UPDATE accounts
 SET balance = $2
 WHERE username = $1
 RETURNING id, username, balance, currency, created_at
 `
 
-type UpdateAccountParams struct {
+type UpdateAccountByUsernameParams struct {
 	Username string `json:"username"`
 	Balance  int64  `json:"balance"`
 }
 
-func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error) {
-	row := q.queryRow(ctx, q.updateAccountStmt, updateAccount, arg.Username, arg.Balance)
+func (q *Queries) UpdateAccountByUsername(ctx context.Context, arg UpdateAccountByUsernameParams) (Account, error) {
+	row := q.queryRow(ctx, q.updateAccountByUsernameStmt, updateAccountByUsername, arg.Username, arg.Balance)
 	var i Account
 	err := row.Scan(
 		&i.ID,
