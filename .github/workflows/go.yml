@@ -48,4 +48,4 @@ jobs:
         DB_DRIVER_NAME: postgres
       run: |
         go mod tidy
-        make test
+        go test -v -cover ./...
