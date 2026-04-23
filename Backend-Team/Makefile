@@ -19,5 +19,5 @@ migrateCreatemysql:
 sqlc:
 	sqlc generate
 test:
-	go test -v -cover ./...
+	go test -v -cover -coverpkg=./... ./...
 .PHONY: postgres createdb dropdb migrateup migratedown migrateCreate sqlc

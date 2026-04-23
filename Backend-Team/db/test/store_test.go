@@ -89,7 +89,7 @@ func TestTransfersTx(t *testing.T) {
 	errors := make(chan error)
 
 	for i := 0; i < n; i++ {
-		txName := fmt.Sprintf("tx %d", i+1)
+		txName := fmt.Sprintf("tx %d", i)
 		FromAccountId := account1.ID
 		ToAccountId := account2.ID
 

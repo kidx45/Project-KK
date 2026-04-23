@@ -28,5 +28,5 @@ func createRandomUser(t *testing.T) sqlc.User {
 }
 		
 func TestCreateUser(t *testing.T) {
-	createRandomUser(t)
+	createRandomUser(t) 
 }
