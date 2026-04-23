@@ -36,7 +36,7 @@ jobs:
       uses: actions/setup-go@v4
 
     - name: Install migrate
-      run: go install github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
     - name: Create the tables in postgres
       working-directory: ./Backend-Team
       run: make migrateup
