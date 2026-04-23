@@ -45,4 +45,6 @@ jobs:
       env:
         DB_URL: postgresql://root:secret@localhost:5433/project_test_kk?sslmode=disable
         DB_DRIVER_NAME: postgres
-      run: make test
+      run: |
+        go mod tidy
+        make test
