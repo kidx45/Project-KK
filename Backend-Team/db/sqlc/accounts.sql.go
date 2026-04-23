@@ -9,6 +9,31 @@ import (
 	"context"
 )
 
+const addMoneyIntoAccount = `-- name: AddMoneyIntoAccount :one
+UPDATE accounts
+SET balance = balance + $2
+WHERE id = $1
+RETURNING id, username, balance, currency, created_at
+`
+
+type AddMoneyIntoAccountParams struct {
+	ID     int64 `json:"id"`
+	Amount int64 `json:"amount"`
+}
+
+func (q *Queries) AddMoneyIntoAccount(ctx context.Context, arg AddMoneyIntoAccountParams) (Account, error) {
+	row := q.queryRow(ctx, q.addMoneyIntoAccountStmt, addMoneyIntoAccount, arg.ID, arg.Amount)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createAccount = `-- name: CreateAccount :one
 INSERT INTO accounts (username, balance, currency)
 VALUES ($1, $2, $3)

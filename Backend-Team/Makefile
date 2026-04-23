@@ -8,8 +8,16 @@ migrateup:
 	migrate -path ./db/migration -database "postgresql://root:secret@localhost:5433/project_test_kk?sslmode=disable" -verbose up
 migratedown:
 	migrate -path ./db/migration -database "postgresql://root:secret@localhost:5433/project_test_kk?sslmode=disable" -verbose down
+migrateupmysql:
+	migrate -path ./db/migration-mysql -database "mysql://root:secret@tcp(localhost:3307)/project_test_kk?tls=false" -verbose up
+migratedownmysql:
+	migrate -path ./db/migration-mysql -database "mysql://root:secret@tcp(localhost:3307)/project_test_kk?tls=false" -verbose down
 migrateCreate:
 	migrate create -ext sql -dir ./db/migration -seq schema_lifeline
+migrateCreatemysql:
+	migrate create -ext sql -dir ./db/migration-mysql -seq schema_lifeline_mysql
 sqlc:
 	sqlc generate
+test:
+	go test -v -cover ./...
 .PHONY: postgres createdb dropdb migrateup migratedown migrateCreate sqlc
