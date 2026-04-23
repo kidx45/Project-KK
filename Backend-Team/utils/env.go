@@ -15,10 +15,7 @@ var AppConfig Config
 
 func LoadEnv() (Config, error) {
     // Load the .env file from the current directory
-    err := godotenv.Load("../../.env.local.development")
-    if err != nil {
-        return Config{}, err
-    }
+    _ = godotenv.Load("../../.env.local.development")
 
 	AppConfig = Config{
 		DB_URL: os.Getenv("DB_URL"),
