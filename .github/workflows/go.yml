@@ -10,6 +10,9 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Backend-Team
     services:
       # Label used to access the service container
       postgres:
@@ -38,13 +41,8 @@ jobs:
     - name: Install migrate
       run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
     - name: Create the tables in postgres
-      working-directory: ./Backend-Team
       run: make migrateup
     - name: Test
-      working-directory: ./Backend-Team
-      env:
-        DB_URL: postgresql://root:secret@localhost:5433/project_test_kk?sslmode=disable
-        DB_DRIVER_NAME: postgres
       run: |
         go mod tidy
         make test
