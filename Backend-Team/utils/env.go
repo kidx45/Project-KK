@@ -11,13 +11,11 @@ type Config struct {
 	DB_DRIVER_NAME string
 }
 
-var AppConfig Config
-
 func LoadEnv() (Config, error) {
     // Load the .env file from the current directory
     _ = godotenv.Load("../../.env.local.development")
 
-	AppConfig = Config{
+	AppConfig := Config{
 		DB_URL: os.Getenv("DB_URL"),
 		DB_DRIVER_NAME: os.Getenv("DB_DRIVER_NAME"),
 		PORT: os.Getenv("PORT"),

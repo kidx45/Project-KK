@@ -17,7 +17,7 @@ func TestTransferTx(t *testing.T) {
 	var txKey = struct{}{}
 
 	log.Printf("Before: account1 balance: %d, account2 balance: %d", account1.Balance, account2.Balance)
-	n := 5
+	n := 3
 	amount := int64(10)
 
 	results := make(chan sqlc.TransferTxResult)

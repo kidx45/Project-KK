@@ -40,3 +40,8 @@ WHERE username = $1;
 INSERT INTO accounts (username, balance, currency)
 VALUES ($1, $2, $3)
 RETURNING *;
+
+-- name: ListAccountsDesc :many
+SELECT * FROM accounts
+ORDER BY id DESC 
+LIMIT $1 OFFSET $2;

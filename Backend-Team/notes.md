@@ -162,6 +162,10 @@ jobs
 
 As we can see, here we have two jobs, build and test, runner is specified using the **`run-on`** keyword. Test needs the build to do its thing first so this job runs after build in a sequential manner. Steps are tasks run sequentially when a job is ran. It contains actions which are a set of commands that by themselves also run sequentially. In a step, there may be multiple actions running.
 
+To also add service to the workflow as postgres in our case it is best to include the serives tag provided by the vendor of your choice. Also we can use a new line to using the "|" symbol in front of the run.
+
+
+
 ### Usage Tips
 
 - **Comments**: Must follow an exact format: `-- name: <method_name> :<return_type>`.

@@ -162,6 +162,46 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 	return items, nil
 }
 
+const listAccountsDesc = `-- name: ListAccountsDesc :many
+SELECT id, username, balance, currency, created_at FROM accounts
+ORDER BY id DESC 
+LIMIT $1 OFFSET $2
+`
+
+type ListAccountsDescParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListAccountsDesc(ctx context.Context, arg ListAccountsDescParams) ([]Account, error) {
+	rows, err := q.query(ctx, q.listAccountsDescStmt, listAccountsDesc, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Account
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Balance,
+			&i.Currency,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateAccountById = `-- name: UpdateAccountById :one
 UPDATE accounts
 SET balance = $2

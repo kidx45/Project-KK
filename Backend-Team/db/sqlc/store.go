@@ -13,7 +13,10 @@ type Store struct {
 }
 
 func NewStore(db *sql.DB) *Store {
-	return &Store{db: db}
+	return &Store{
+		db:      db,
+		Queries: New(db),
+	}
 }
 
 func (s *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
@@ -68,6 +71,7 @@ func (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferT
 			return err
 		}
 
+		log.Printf("%s is creating an entry for account %d with %d",myName, arg.FromAccountID,-arg.Amount)
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.FromAccountID,
 			Amount:    -arg.Amount,
@@ -76,6 +80,7 @@ func (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferT
 			return err
 		}
 
+		log.Printf("%s is creating an entry for account %d with %d",myName, arg.ToAccountID,arg.Amount)
 		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.ToAccountID,
 			Amount:    arg.Amount,
@@ -85,6 +90,7 @@ func (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferT
 		}
 
 		if arg.FromAccountID < arg.ToAccountID {
+			log.Printf("%s is subtracting from account %d with %d",myName, arg.FromAccountID,-arg.Amount)
 			result.FromAccount, err = q.AddMoneyIntoAccount(ctx, AddMoneyIntoAccountParams{
 				ID:     arg.FromAccountID,
 				Amount: -arg.Amount,
@@ -93,6 +99,7 @@ func (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferT
 				return err
 			}
 
+			log.Printf("%s is adding to account %d with %d",myName, arg.ToAccountID,arg.Amount)
 			result.ToAccount, err = q.AddMoneyIntoAccount(ctx, AddMoneyIntoAccountParams{
 				ID:     arg.ToAccountID,
 				Amount: +arg.Amount,
@@ -101,6 +108,7 @@ func (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferT
 				return err
 			}
 		} else {
+			log.Printf("%s is adding to account %d with %d",myName, arg.ToAccountID,arg.Amount)
 			result.ToAccount, err = q.AddMoneyIntoAccount(ctx, AddMoneyIntoAccountParams{
 				ID:     arg.ToAccountID,
 				Amount: +arg.Amount,
@@ -109,6 +117,7 @@ func (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferT
 				return err
 			}
 
+			log.Printf("%s is subtracting from account %d with %d",myName, arg.FromAccountID,-arg.Amount)
 			result.FromAccount, err = q.AddMoneyIntoAccount(ctx, AddMoneyIntoAccountParams{
 				ID:     arg.FromAccountID,
 				Amount: -arg.Amount,

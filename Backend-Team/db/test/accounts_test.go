@@ -39,3 +39,32 @@ func TestGetAccount(t *testing.T) {
 	require.Error(t,err2)
 }
 
+func TestListAccounts(t *testing.T) {
+	accounts := make([]sqlc.Account,0)
+	for i := 0; i < 5; i++ {
+		accounts = append(accounts,createRandomAccount(t))
+	}
+	
+	accountGot,err := testQueries.ListAccountsDesc(context.Background(),sqlc.ListAccountsDescParams{
+		Limit: 5,
+		Offset: 0,
+	})
+	require.NoError(t,err)
+	for i := 4; i >= 0; i-- {
+		require.NotEmpty(t, accountGot[4-i])
+		require.Equal(t,accountGot[4-i].Username,accounts[i].Username)
+		require.Equal(t,accountGot[4-i].Balance,accounts[i].Balance)
+		require.Equal(t,accountGot[4-i].Currency,accounts[i].Currency)
+	}
+}
+
+func TestUpdateAccount(t *testing.T) {
+	account := createRandomAccount(t)
+	param := sqlc.UpdateAccountByIdParams{
+		ID: account.ID,
+		Balance: account.Balance - 100,
+	}
+	updatedAccount,err := testQueries.UpdateAccountById(context.Background(), param)
+	require.NoError(t,err)
+	require.Equal(t,updatedAccount.Balance,account.Balance-100)
+}
