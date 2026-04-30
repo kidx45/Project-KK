@@ -20,4 +20,6 @@ sqlc:
 	sqlc generate
 test:
 	go test -v -cover -coverpkg=./... ./...
+mockgen:
+	mockgen -package=mockdb -destination=./db/mockdb/store.go github.com/kidx45/Project-KK/Backend-Team/db/sqlc Store
 .PHONY: postgres createdb dropdb migrateup migratedown migrateCreate sqlc

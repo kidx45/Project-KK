@@ -22,7 +22,7 @@ func (s *Server) CreateUser (ctx *gin.Context) {
 		return
 	}
 
-	user, err := s.store.CreateUser(ctx, db.CreateUserParams{
+	user, err := s.Store.CreateUser(ctx, db.CreateUserParams{
 		Username: req.Username,
 		HashedPassword: req.HashedPassword,
 		Email: req.Email,
@@ -50,7 +50,7 @@ func (s *Server) ListUsers (ctx *gin.Context) {
 		return
 	}
 
-	users, err := s.store.ListUsers(ctx,db.ListUsersParams{
+	users, err := s.Store.ListUsers(ctx,db.ListUsersParams{
 		Limit: req.PageSize,
 		Offset: (req.PageID-1)*req.PageSize,
 	})
@@ -60,4 +60,23 @@ func (s *Server) ListUsers (ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK,users)
+}
+
+type GetUserRequest struct {
+	Username string `uri:"username" binding:"required"`
+}
+
+func (s *Server) GetUserByUsername (ctx *gin.Context) {
+	var req GetUserRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest,errorResponse(err))
+		return
+	}
+
+	user,err := s.Store.GetUser(ctx,req.Username)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound,errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK,user)
 }

@@ -63,7 +63,7 @@ Context package provides:
 - **`context.WithCancel()`**: Allows you to manually trigger a "stop" signal.
 - **`context.WithValue()`**: Allows you to pass small bits of data (like a Request-ID for logging) all the way down to the database layer.
 
-## 📑 Prepared Statments
+## 📑 Prepared Statements
 
 It is an optimization because it changes how the database processes your SQL queries to make them faster and more secure. In the regular way, for each request you send that requires a database, every single time:
 
@@ -94,48 +94,48 @@ It is a single unit of work involving multiple operation for executing a specifi
 
 This is done to satisfy the ACID property
 
-## 🛣️ Go Routine, channels and Context passing for debuging
+## 🛣️ Go Routine, channels and Context passing for debugging
 ### Go Routine
-Go Rountine is a property found in golang that allows us to simulate real world traffic and when they hit the same db at the same time which is very useful in tests which will allow us how or db is accessed and preventes deadlocking in the future. It is mainly used in the HTTP layer if needed explicit definition but frameworks like Gin Framework and chi Framework automatically have that so there is no need to specify the go func().
+Go Routine is a property found in golang that allows us to simulate real world traffic and when they hit the same db at the same time which is very useful in tests which will allow us how or db is accessed and prevents deadlocking in the future. It is mainly used in the HTTP layer if needed explicit definition but frameworks like Gin Framework and chi Framework automatically have that so there is no need to specify the go func().
 
 ### Channels
-Whenever the go routine is used, it run in its own background outside of function it lives in hence the function may finish before the db and we won't be able to read the result. So channels act like a pipline that allows us to connect the functiona and go routine passing data that is needed and later accessed using the arrow symbol
+Whenever the go routine is used, it run in its own background outside of function it lives in hence the function may finish before the db and we won't be able to read the result. So channels act like a pipeline that allows us to connect the function and go routine passing data that is needed and later accessed using the arrow symbol
 
 ## Context
-It is basically a package passed around function to function using for debuging and passing data without the needed to change the parameters of our fucntions that we are passing it into. In a context, we need a key inorder to passing and get the value we silently passed into the function and passsing an argument may cause a collision hence we use the struct.
+It is basically a package passed around function to function using for debugging and passing data without the needed to change the parameters of our functions that we are passing it into. In a context, we need a key in-order to passing and get the value we silently passed into the function and passing an argument may cause a collision hence we use the struct.
 
-## 🔒️ DeadLock occurence
-A deadlock occurs in our case when two transactions are trying to access resources of eachother that can't be aquired unless the other finishes their operation like they either commit or role back hence we achieve a deadlock. Ways to avoid include always start a db transaction and finish it before starting another and always locking the same resources in the same order. (this is to only avoid deadlocks) but this doesn't allow us to run transactions concurrently. Hence by editing our db schema and specifying how the operations execute (insert, update, etc), we are able to avoid deadlocks and achieve concurrency.
+## 🔒️ DeadLock occurrence
+A deadlock occurs in our case when two transactions are trying to access resources of each-other that can't be acquired unless the other finishes their operation like they either commit or role back hence we achieve a deadlock. Ways to avoid include always start a db transaction and finish it before starting another and always locking the same resources in the same order. (this is to only avoid deadlocks) but this doesn't allow us to run transactions concurrently. Hence by editing our db schema and specifying how the operations execute (insert, update, etc), we are able to avoid deadlocks and achieve concurrency.
 
 ## 🎚️ Isolation Level in psql and mysql
 When ever a transaction occurs, it must follow and satisfy the ACID property which mean
-- **`Atomicity`** - Operations in atransaction must in its whole successed or fail
-- **`Consistant`** - Database after a transaction must be valid
+- **`Atomicity`** - Operations in a transaction must in its whole succeed or fail
+- **`Consistent`** - Database after a transaction must be valid
 - **`Isolation`** - No transaction will affect another transaction
-- **`Durability`** - A success transaction must be able to record requried data back to its database
+- **`Durability`** - A success transaction must be able to record required data back to its database
 
-If a transaction affect the data retrieved and seen by another running transaction, then a read phenomenon will occur. To solve this, we use a set of isolation levels specified by the ANSI which are read uncommited, read commited, repeatable read, serializable.
-- **`read uncommitted`** - low isolation level which allow for other transactions to see changes that are made by other transaction that haven't been commited yet which leads to **`dirty read`**
-- **`read committed`** - isolation level which allow for other transactions to see changes made by other transactions that have committed leadin **`non-repeatable read`**
-- **`repeatable read`** - isolation level which won't allow for transactions to see changes made by a commited transaction but will lead to a situation where a set of transaction were done sequentially won't make sense which is also called the **`serialization anomaly`**
+If a transaction affect the data retrieved and seen by another running transaction, then a read phenomenon will occur. To solve this, we use a set of isolation levels specified by the ANSI which are read uncommitted, read committed, repeatable read, serializable.
+- **`read uncommitted`** - low isolation level which allow for other transactions to see changes that are made by other transaction that haven't been committed yet which leads to **`dirty read`**
+- **`read committed`** - isolation level which allow for other transactions to see changes made by other transactions that have committed lead into **`non-repeatable read`**
+- **`repeatable read`** - isolation level which won't allow for transactions to see changes made by a committed transaction but will lead to a situation where a set of transaction were done sequentially won't make sense which is also called the **`serialization anomaly`**
 - **`serializable`** - highest isolation level which allows for transactions to strictly run sequentially to avoid any anomaly which will solve the issue that arise from different transaction affecting the values of the other running transactions 
 
-In psql however, there is read-uncommited and read-committed behave the same and when trying to update a value in repeatable read, it will throw and error instead of actually updating like in mysql. Also a deadlock might occur in serializable. While postgres uses dependency detection to avoid serialization anomaly, mysql uses a locking mechanism.
+In psql however, there is read-uncommitted and read-committed behave the same and when trying to update a value in repeatable read, it will throw and error instead of actually updating like in mysql. Also a deadlock might occur in serializable. While postgres uses dependency detection to avoid serialization anomaly, mysql uses a locking mechanism.
 
 ## 📠 CI Integration using github's actions
-In order to track new changes that occur into our github repository and above potential errors and bugs, we use an automated workflow either through actions, jetkins ... which are used for automating the build and running process.
-Here, workflow is a automated procedure consisting of jobs which can be trigged either
+In order to track new changes that occur into our github repository and above potential errors and bugs, we use an automated workflow either through actions, jenkins ... which are used for automating the build and running process.
+Here, workflow is a automated procedure consisting of jobs which can be triggered either
 - when an event occurs on the repository
 - when an scheduled trigger is on
 - when manually pressing in the UI
 
-Inorder to create a workflow, we need to add a .github/workflow/some_name.yml file into the repository.
+In-order to create a workflow, we need to add a .github/workflow/some_name.yml file into the repository.
 
 At the beginning of a yml file, we would have the
 - **`name`** - name of the workflow
 - **`on`** - specifies what actions like a push or schedule will enable the workflow other than the manuel trigger
 
-In order to run the set of jobs that are found in the workflow we need a runner which is a server that runs one jobs at a time and specfied in the using such command
+In order to run the set of jobs that are found in the workflow we need a runner which is a server that runs one jobs at a time and specified in the using such command
 ```yml
 jobs
   build:
@@ -162,8 +162,15 @@ jobs
 
 As we can see, here we have two jobs, build and test, runner is specified using the **`run-on`** keyword. Test needs the build to do its thing first so this job runs after build in a sequential manner. Steps are tasks run sequentially when a job is ran. It contains actions which are a set of commands that by themselves also run sequentially. In a step, there may be multiple actions running.
 
-To also add service to the workflow as postgres in our case it is best to include the serives tag provided by the vendor of your choice. Also we can use a new line to using the "|" symbol in front of the run.
+To also add service to the workflow as postgres in our case it is best to include the services tag provided by the vendor of your choice. Also we can use a new line to using the "|" symbol in front of the run.
 
+## ENV variables
+Reading from file - to load default configuration for local development
+Reading from an env file - to load configuration to override the local configuration
+Viper is a really good way to read and load configration from config files.
+
+## Validators
+In go, when validating a request, we can create a custom validator like the one in JavaScript where we use Joi. 
 
 
 ### Usage Tips
@@ -177,3 +184,5 @@ To also add service to the workflow as postgres in our case it is best to includ
 - **optimization is king**: if you have the opportunity to make say your sql querying shorter then it is best to do so. Analyze it carefully
 
 - **Have the ability retry transactions in the case of a deadlock**
+
+- **Exporting stuff**: When in need to export stuff we use a capital letter so use a capital letter always a default instead of using small letters

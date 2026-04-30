@@ -1,22 +1,31 @@
 package api
 
 import (
-	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
+	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
+	"github.com/kidx45/Project-KK/Backend-Team/utils"
 )
 
 type Server struct {
-	store  *db.Store
-	router *gin.Engine
+	Store  db.Store
+	Router *gin.Engine
 }
 
-func NewServer(store *db.Store) *Server {
-	server := &Server{store: store}
+func NewServer(store db.Store) *Server {
+	server := &Server{Store: store}
 	router := gin.Default()
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("currency",utils.ValidCurrency)
+	}
 	router.POST("/user",server.CreateUser)
 	router.GET("/users",server.ListUsers)
+	router.GET("/user/:username",server.GetUserByUsername)
+	router.POST("/transfer",server.CreateTransfer)
 
-	server.router = router
+	server.Router = router
 	return server
 }
 
@@ -27,5 +36,5 @@ func errorResponse(err error) gin.H {
 }
 
 func (s *Server) Start (address string) error {
-	return s.router.Run(address)
+	return s.Router.Run(address)
 }

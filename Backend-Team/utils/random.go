@@ -31,7 +31,7 @@ func RandomUserName() string {
 }
 
 func RandomCurrency() string {
-	currencies := []string{"USD", "EUR"}
+	currencies := []string{CurrencyEUR,CurrencyUSD}
 	return currencies[rand.Intn(len(currencies))]
 }
 

@@ -1,8 +1,7 @@
 package utils
 
 import (
-    "os"
-    "github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
@@ -11,15 +10,16 @@ type Config struct {
 	DB_DRIVER_NAME string
 }
 
-func LoadEnv() (Config, error) {
+func LoadEnv(path string) (Config, error) {
+	viper.SetConfigFile(path)
+	viper.AutomaticEnv()
     // Load the .env file from the current directory
-    _ = godotenv.Load("../../.env.local.development")
-
-	AppConfig := Config{
-		DB_URL: os.Getenv("DB_URL"),
-		DB_DRIVER_NAME: os.Getenv("DB_DRIVER_NAME"),
-		PORT: os.Getenv("PORT"),
+	err := viper.ReadInConfig()
+	if err != nil {
+		return Config{}, err
 	}
 
+	AppConfig := Config{}
+	viper.Unmarshal(&AppConfig)
 	return AppConfig, nil
 }

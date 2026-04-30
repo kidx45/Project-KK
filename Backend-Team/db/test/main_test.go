@@ -14,7 +14,7 @@ import (
 var testQueries *sqlc.Queries
 var testDB *sql.DB
 func TestMain(m *testing.M) {
-	config, err := utils.LoadEnv()
+	config, err := utils.LoadEnv("../../.env")
 	if err != nil {
 		log.Fatal("cannot load env:", err)
 	}

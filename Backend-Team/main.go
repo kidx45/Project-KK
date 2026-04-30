@@ -4,29 +4,27 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/kidx45/Project-KK/Backend-Team/api"
 	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
+	"github.com/kidx45/Project-KK/Backend-Team/utils"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	_ = godotenv.Load(".env.local.development")
+	AppConfig, err := utils.LoadEnv(".env")
+	if err != nil {
+		log.Fatal("Can't load data because: ", err)
+	}
 
-	DB_URL := os.Getenv("DB_URL")
-	DB_DRIVER_NAME := os.Getenv("DB_DRIVER_NAME")
-	PORT := os.Getenv("PORT")
-
-	conn, err := sql.Open(DB_DRIVER_NAME, DB_URL)
+	conn, err := sql.Open(AppConfig.DB_DRIVER_NAME, AppConfig.DB_URL)
 	if err != nil {
 		log.Fatal("Can't start seerver due to: ", err)
 	}
 
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
-	address := fmt.Sprintf("localhost:%s", PORT)
+	address := fmt.Sprintf("localhost:%s", AppConfig.PORT)
 	err = server.Start(address)
 	if err != nil {
 		log.Fatal("Can't start server due to: ", err)
