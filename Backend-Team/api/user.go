@@ -6,14 +6,22 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
+	"github.com/kidx45/Project-KK/Backend-Team/utils"
 )
 
 type CreateUserRequest struct {
 	Username       string `json:"username" binding:"required"`
-	HashedPassword string `json:"hashedPassword" binding:"required"`
-	Email          string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Email          string `json:"email" binding:"required,email"`
 	FullName       string `json:"fullName" binding:"required"`
 	PhoneNumber    string `json:"phoneNumber" binding:"required"`
+}
+
+type CreateUserResponse struct {
+	User string `json:"username"`
+	Email string `json:"email"`
+	FullName string `json:"fullName"`
+	PhoneNumber string `json:"phoneNumber"`
 }
 
 func (s *Server) CreateUser (ctx *gin.Context) {
@@ -23,9 +31,15 @@ func (s *Server) CreateUser (ctx *gin.Context) {
 		return
 	}
 
+	hashed, err := utils.HashPassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		return
+	}
+
 	user, err := s.Store.CreateUser(ctx, db.CreateUserParams{
 		Username: req.Username,
-		HashedPassword: req.HashedPassword,
+		HashedPassword: hashed,
 		Email: req.Email,
 		FullName: req.FullName,
 		PhoneNumber: req.PhoneNumber,
@@ -36,7 +50,12 @@ func (s *Server) CreateUser (ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated,user)
+	ctx.JSON(http.StatusCreated,CreateUserResponse{
+		User: user.Username,
+		Email: user.Email,
+		FullName: user.FullName,
+		PhoneNumber: user.PhoneNumber,
+	})
 }
 
 type ListUsersRequest struct {
