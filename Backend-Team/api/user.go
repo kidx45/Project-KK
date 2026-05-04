@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -75,7 +76,11 @@ func (s *Server) GetUserByUsername (ctx *gin.Context) {
 
 	user,err := s.Store.GetUser(ctx,req.Username)
 	if err != nil {
+		if err == sql.ErrNoRows {
 		ctx.JSON(http.StatusNotFound,errorResponse(err))
+		return
+		}
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK,user)

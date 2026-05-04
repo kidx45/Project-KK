@@ -1,7 +1,11 @@
 package test
 
 import (
+	"bytes"
+	"database/sql"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -42,6 +46,17 @@ func TestGetUser(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Equal(t, gotUser, user)
+		}, 
+		
+	}, {
+		name: "Not Found",
+		username: user.Username,
+		buildstubs: func(store *mockdb.MockStore) {
+			store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(db.User{},sql.ErrNoRows)
+		},
+		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+			require.Equal(t, http.StatusNotFound, recorder.Code)
+			requireBodyMatchError(t, recorder.Body, sql.ErrNoRows)
 		},
 	}}
 
@@ -64,4 +79,16 @@ func TestGetUser(t *testing.T) {
 		})
 
 	}
+}
+
+func requireBodyMatchError(t *testing.T, body *bytes.Buffer, err error) {
+	data, errRead := io.ReadAll(body)
+	require.NoError(t, errRead)
+
+	var gotError map[string]string
+	errUnmarshal := json.Unmarshal(data, &gotError)
+	require.NoError(t, errUnmarshal)
+
+	require.Contains(t, gotError, "error")
+	require.Equal(t, err.Error(), gotError["error"])
 }

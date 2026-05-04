@@ -1,0 +1,1 @@
+ALTER TABLE "accounts" ADD CONSTRAINT "username_currency_key" UNIQUE ("username","currency");

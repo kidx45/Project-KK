@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS "accounts" DROP CONSTRAINT IF EXISTS "username_currency_key";
