@@ -172,6 +172,8 @@ Viper is a really good way to read and load configration from config files.
 ## Validators
 In go, when validating a request, we can create a custom validator like the one in JavaScript where we use Joi. 
 
+## Testing using gomock and custom gomock matcher
+When the test runs, the API receives the raw password in the request body, hashes it, and calls store.CreateUser(ctx, params) with the hashed password inside params — gomock intercepts that real call and passes params as x into Matches(x). Meanwhile, back in the test setup, you built arg (your checklist of expected values without the hash) and passed it along with the raw password into EqCreateUserParams. So inside Matches, you have two things: x which is what the API actually sent (including the hash), and e.user which is your checklist — it first verifies the hash in x came from the raw password using CheckPassword, then patches that hash into e.user so DeepEqual can compare everything together, essentially saying "the API called CreateUser with the right username, email, fullName, phoneNumber AND a valid hash of the password".
 
 ### Usage Tips
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
+	"github.com/lib/pq"
 	"github.com/kidx45/Project-KK/Backend-Team/utils"
 )
 
@@ -46,6 +47,13 @@ func (s *Server) CreateUser (ctx *gin.Context) {
 	})
 
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
 		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
 		return
 	}
