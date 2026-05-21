@@ -13,7 +13,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
-	"github.com/kidx45/Project-KK/Backend-Team/api"
 	"github.com/kidx45/Project-KK/Backend-Team/db/mockdb"
 	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
 	"github.com/kidx45/Project-KK/Backend-Team/utils"
@@ -165,7 +164,7 @@ func TestCreateUser(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			testCase[i].buildStubs(store)
-			server := api.NewServer(store)
+			server := newTestServer(t,store)
 			recorder := httptest.NewRecorder()
 			reqBody, err := json.Marshal(testCase[i].body)
 			require.NoError(t, err)
@@ -197,7 +196,11 @@ func TestGetUser(t *testing.T) {
 			gotUser, err := utils.ConvertBuffertoUserType(recorder.Body)
 
 			require.NoError(t, err)
-			require.Equal(t, gotUser, user)
+			require.Equal(t, gotUser.Username, user.Username)
+			require.Equal(t, gotUser.Email, user.Email)
+			require.Equal(t, gotUser.FullName, user.FullName)
+			require.Equal(t, gotUser.PhoneNumber, user.PhoneNumber)
+			require.Empty(t, gotUser.HashedPassword)
 		},
 	}, {
 		name:     "Not Found",
@@ -217,7 +220,7 @@ func TestGetUser(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			testCase[i].buildstubs(store)
-			server := api.NewServer(store)
+			server := newTestServer(t,store)
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/user/%s", user.Username)
 			req, err := http.NewRequest(http.MethodGet, url, nil)

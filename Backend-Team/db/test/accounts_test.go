@@ -40,22 +40,21 @@ func TestGetAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
-	accounts := make([]sqlc.Account,0)
+	var lastAccount sqlc.Account
 	for i := 0; i < 5; i++ {
-		accounts = append(accounts,createRandomAccount(t))
+		account := createRandomAccount(t)
+		lastAccount = account
 	}
 	
-	accountGot,err := testQueries.ListAccountsDesc(context.Background(),sqlc.ListAccountsDescParams{
+	accountGot,err := testQueries.ListAccounts(context.Background(),sqlc.ListAccountsParams{
+		Username: lastAccount.Username,
 		Limit: 5,
 		Offset: 0,
 	})
 	require.NoError(t,err)
-	for i := 4; i >= 0; i-- {
-		require.NotEmpty(t, accountGot[4-i])
-		require.Equal(t,accountGot[4-i].Username,accounts[i].Username)
-		require.Equal(t,accountGot[4-i].Balance,accounts[i].Balance)
-		require.Equal(t,accountGot[4-i].Currency,accounts[i].Currency)
-	}
+	require.NotEmpty(t,accountGot)
+	require.Equal(t,accountGot[0].Username,lastAccount.Username)
+	require.Equal(t,accountGot[0].Balance,lastAccount.Balance)
 }
 
 func TestUpdateAccount(t *testing.T) {

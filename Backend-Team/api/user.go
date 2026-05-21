@@ -18,11 +18,20 @@ type CreateUserRequest struct {
 	PhoneNumber    string `json:"phoneNumber" binding:"required"`
 }
 
-type CreateUserResponse struct {
+type UserResponse struct {
 	User string `json:"username"`
 	Email string `json:"email"`
 	FullName string `json:"fullName"`
 	PhoneNumber string `json:"phoneNumber"`
+}
+
+func newResponse(user db.User) UserResponse {
+	return UserResponse{
+		User: user.Username,
+		Email: user.Email,
+		FullName: user.FullName,
+		PhoneNumber: user.PhoneNumber,
+	}
 }
 
 func (s *Server) CreateUser (ctx *gin.Context) {
@@ -58,12 +67,7 @@ func (s *Server) CreateUser (ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated,CreateUserResponse{
-		User: user.Username,
-		Email: user.Email,
-		FullName: user.FullName,
-		PhoneNumber: user.PhoneNumber,
-	})
+	ctx.JSON(http.StatusCreated,newResponse(user))
 }
 
 type ListUsersRequest struct {
@@ -110,5 +114,71 @@ func (s *Server) GetUserByUsername (ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK,user)
+	ctx.JSON(http.StatusOK,newResponse(user))
 }
+
+func (s *Server) DeleteUser(ctx *gin.Context) {
+	var req GetUserRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest,errorResponse(err))
+		return
+	}
+	err := s.Store.DeleteUser(ctx,req.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+		ctx.JSON(http.StatusNotFound,errorResponse(err))
+		return
+		}
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK,gin.H{"message":"User deleted successfully"})
+}
+
+type LoginUserRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type LoginUserResponse struct {
+	AccessToken string `json:"access_token"`
+	User UserResponse `json:"user"`
+}
+
+func (s *Server) LoginUser(ctx *gin.Context) {
+	var req LoginUserRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest,errorResponse(err))
+		return
+	}
+	user, err := s.Store.GetUser(ctx,req.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+		ctx.JSON(http.StatusNotFound,errorResponse(err))
+		return
+		}
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		return
+	}
+	err = utils.CheckPassword(req.Password, user.HashedPassword)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized,errorResponse(err))
+		return
+	}
+
+	accessToken, err := s.Token.CreateToken(
+		user.Username,
+		s.Config.ACCESS_TOKEN_DURATION,
+	)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError,errorResponse(err))
+		return
+	}
+	
+	rps := LoginUserResponse{
+		AccessToken: accessToken,
+		User: newResponse(user),
+	}
+	ctx.JSON(http.StatusOK,rps)
+}
+

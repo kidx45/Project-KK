@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
+	"github.com/kidx45/Project-KK/Backend-Team/token"
 )
 
 type CreateTransferRequest struct {
@@ -30,6 +31,12 @@ func (s *Server) CreateTransfer(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	payload := ctx.MustGet("auth_payload").(*token.Payload)
+	if payload.Username != fromAccount.Username {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("From Account doesn't belong to user")))
 		return
 	}
 	toAccount, err := s.Store.GetAccountById(ctx, req.ToAccountID)

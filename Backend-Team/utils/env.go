@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 )
 
@@ -8,6 +10,8 @@ type Config struct {
 	DB_URL string
 	PORT string
 	DB_DRIVER_NAME string
+	SYMMETRIC_SECRET_KEY string
+	ACCESS_TOKEN_DURATION time.Duration
 }
 
 func LoadEnv(path string) (Config, error) {

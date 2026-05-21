@@ -23,7 +23,10 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	server := api.NewServer(store)
+	server , err := api.NewServer(AppConfig, store)
+	if err != nil {
+		log.Fatal("Can't create server due to: ", err)
+	}
 	address := fmt.Sprintf("localhost:%s", AppConfig.PORT)
 	err = server.Start(address)
 	if err != nil {
