@@ -1,3 +1,5 @@
 .env.local.development
 .env.local.production
 .env
+.obsidian
+.vscode

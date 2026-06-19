@@ -10,11 +10,13 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/kidx45/Project-KK/Backend-Team/db/mockdb"
 	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
+	"github.com/kidx45/Project-KK/Backend-Team/token"
 	"github.com/kidx45/Project-KK/Backend-Team/utils"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
@@ -164,7 +166,7 @@ func TestCreateUser(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			testCase[i].buildStubs(store)
-			server := newTestServer(t,store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			reqBody, err := json.Marshal(testCase[i].body)
 			require.NoError(t, err)
@@ -183,6 +185,7 @@ func TestGetUser(t *testing.T) {
 	testCase := []struct {
 		name          string
 		username      string
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildstubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{{
@@ -190,6 +193,9 @@ func TestGetUser(t *testing.T) {
 		username: user.Username,
 		buildstubs: func(store *mockdb.MockStore) {
 			store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(user, nil)
+		},
+		setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			addAuthorization(t, request, tokenMaker, "Bearer", user.Username, time.Minute)
 		},
 		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 			require.Equal(t, http.StatusOK, recorder.Code)
@@ -205,6 +211,9 @@ func TestGetUser(t *testing.T) {
 	}, {
 		name:     "Not Found",
 		username: user.Username,
+		setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			addAuthorization(t, request, tokenMaker, "Bearer", user.Username, time.Minute)
+		},
 		buildstubs: func(store *mockdb.MockStore) {
 			store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(db.User{}, sql.ErrNoRows)
 		},
@@ -220,7 +229,7 @@ func TestGetUser(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			testCase[i].buildstubs(store)
-			server := newTestServer(t,store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/user/%s", user.Username)
 			req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -228,6 +237,7 @@ func TestGetUser(t *testing.T) {
 				t.Errorf("error creating request: %v", err)
 			}
 
+			testCase[i].setupAuth(t, req, server.Token)
 			server.Router.ServeHTTP(recorder, req)
 			testCase[i].checkResponse(t, recorder)
 		})

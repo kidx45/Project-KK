@@ -19,11 +19,11 @@ func main() {
 
 	conn, err := sql.Open(AppConfig.DB_DRIVER_NAME, AppConfig.DB_URL)
 	if err != nil {
-		log.Fatal("Can't start seerver due to: ", err)
+		log.Fatal("Can't start server due to: ", err)
 	}
 
 	store := db.NewStore(conn)
-	server , err := api.NewServer(AppConfig, store)
+	server, err := api.NewServer(AppConfig, store)
 	if err != nil {
 		log.Fatal("Can't create server due to: ", err)
 	}

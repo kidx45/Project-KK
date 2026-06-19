@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newTestServer (t *testing.T, store db.Store) *api.Server{
+func newTestServer(t *testing.T, store db.Store) *api.Server {
 	config := utils.Config{
-		SYMMETRIC_SECRET_KEY: utils.RandomLetterString(32),
+		SYMMETRIC_SECRET_KEY:  utils.RandomLetterString(32),
 		ACCESS_TOKEN_DURATION: time.Minute,
 	}
 	server, err := api.NewServer(config, store)

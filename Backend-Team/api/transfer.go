@@ -20,7 +20,7 @@ type CreateTransferRequest struct {
 func (s *Server) CreateTransfer(ctx *gin.Context) {
 	var req CreateTransferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest,errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
