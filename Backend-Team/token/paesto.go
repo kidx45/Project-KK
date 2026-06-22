@@ -1,14 +1,15 @@
 package token
 
 import (
-	"github.com/o1egl/paseto"
-	"time"
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/o1egl/paseto"
 )
 
 type PasetoMaker struct {
-	paseto 	*paseto.V2
+	paseto       *paseto.V2
 	symmetricKey []byte
 }
 
@@ -17,20 +18,20 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 		return nil, errors.New("symmetric key must be at least 32 bytes long")
 	}
 	return &PasetoMaker{
-		paseto: paseto.NewV2(),
+		paseto:       paseto.NewV2(),
 		symmetricKey: []byte(symmetricKey),
 	}, nil
 }
 func (j *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
-	payload, err := NewPayload(username,duration)
+	payload, err := NewPayload(username, duration)
 	if err != nil {
-		return "", fmt.Errorf("cant't create token %s",err)
+		return "", fmt.Errorf("cant't create token %s", err)
 	}
-	return j.paseto.Encrypt(j.symmetricKey,payload,nil)
+	return j.paseto.Encrypt(j.symmetricKey, payload, nil)
 }
 func (j *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	payload := &Payload{}
-	err := j.paseto.Decrypt(token,j.symmetricKey,payload,nil)
+	err := j.paseto.Decrypt(token, j.symmetricKey, payload, nil)
 	if err != nil {
 		return nil, errors.New("Invalid Token")
 	}
