@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./Backend-Team
+        working-directory: .
     services:
       # Label used to access the service container
       postgres:
