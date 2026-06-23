@@ -164,6 +164,12 @@ As we can see, here we have two jobs, build and test, runner is specified using 
 
 To also add service to the workflow as postgres in our case it is best to include the services tag provided by the vendor of your choice. Also we can use a new line to using the "|" symbol in front of the run.
 
+### GitHub Actions versions
+
+- **`actions/checkout@v4`**: Downloads the repository code into the GitHub runner so later steps can access the files.
+- **`actions/setup-go@v4`**: Installs and configures Go on the runner, using the version specified under `go-version`.
+- **`@v4`**: Means the workflow is using version 4 of that GitHub Action. It keeps the workflow stable while still receiving compatible updates within that major version.
+
 ## ENV variables
 Reading from file - to load default configuration for local development
 Reading from an env file - to load configuration to override the local configuration
@@ -218,3 +224,52 @@ When the test runs, the API receives the raw password in the request body, hashe
         - **Samples**: Only records a percentage of requests (e.g., 10%).
         - **Asynchronous**: Sends data in the background (using Goroutines) so the user doesn't wait.
         - **Batching**: Sends groups of logs at once rather than one-by-one.
+
+# Dockerfile Explanation & Summary
+
+A **Dockerfile** is a blueprint used to package an application into an isolated environment called a **container**. This ensures the application runs exactly the same way on any machine (your laptop, a teammate's computer, or a cloud server).
+
+---
+
+## 🛠️ Step-by-Step Command Breakdown
+
+* `FROM golang:1.26-alpine3.24`
+    * **The Base Environment:** Starts with a lightweight Linux operating system (Alpine) that comes with Go version 1.26 pre-installed. You don't have to install Go manually.
+* `WORKDIR /app`
+    * **The Working Directory:** Creates an internal folder named `/app` inside the container and switches into it. All subsequent actions happen here.
+* `COPY . .`
+    * **Copying Files:** Takes all the source code files from your actual machine (the first `.`) and copies them into the container's `/app` folder (the second `.`).
+* `RUN go build -o main main.go`
+    * **The Build Step:** Compiles the Go source code inside the container into a single, executable binary file named `main`.
+* `EXPOSE 8080`
+    * **The Label/Documentation:** Documents that the application inside the container intends to listen for network traffic on port `8080`. *(Note: This does not actually open the port or run code).*
+* `CMD ["./main"]`
+    * **The Launch Command:** The final instruction that actually triggers and runs your compiled Go binary (`main`) when the container starts up.
+
+---
+
+## ❓ The `EXPOSE` Command: Who Uses It & Where is It Viewed?
+
+`EXPOSE` does **not** run code or automatically open ports to the outside world. It acts as an official piece of metadata (a "contract") between the developer and the infrastructure.
+
+### 👥 Who Uses It?
+* **DevOps & Cloud Engineers:** They read `EXPOSE` to write deployment configurations (like Kubernetes Services, AWS Task Definitions, or Nginx reverse proxies) so they know where to route external internet traffic.
+* **Developers:** It acts as instant code documentation. New team members can look at the Dockerfile and immediately know which port the application communicates on without digging through the Go source code.
+
+### 🖥️ Where is it Viewed?
+* **Terminal (`docker ps`):** Docker displays exposed ports under the `PORTS` column when listing active containers.
+* **Docker Desktop:** The graphical user interface reads this line to display the port and provide a clickable hyperlink to open the app in your browser.
+* **Cloud Automation Tools:** Platforms like AWS ECS or Google Cloud Run scan this metadata to automatically pre-fill or suggest network port mapping settings during deployment.
+
+### 🔗 Activating the Port
+To actually connect your computer's browser to the container, you must explicitly bind the ports using the `-p` flag when running the container:
+```bash
+docker run -p 8080:8080 <image-name>
+
+## 🏷️ The `-t` Tag (Used in Terminal during `docker build`)
+
+* **What It Means:** Stands for **Tag**. It is used in the terminal command when building your container image.
+* **The Use Case:** Prevents random, cryptic IDs by giving your image a human-readable name and version (e.g., `my-go-app:1.0`).
+* **Command Syntax:** Run as `docker build -t my-go-app:1.0 .` where `my-go-app` is the name, `:1.0` is the version, and `.` means current folder.
+* **Version Control:** DevOps teams use it to track releases (v1.0, v1.1) and easily roll back to previous versions if a bug occurs.
+* **Cloud Deployment:** Required by platforms like AWS, Google Cloud, or Docker Hub to match their registry format before pushing code.

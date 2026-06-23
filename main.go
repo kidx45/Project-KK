@@ -27,7 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Can't create server due to: ", err)
 	}
-	address := fmt.Sprintf("localhost:%s", AppConfig.PORT)
+	address := fmt.Sprintf("0.0.0.0:%s", AppConfig.PORT)
 	err = server.Start(address)
 	if err != nil {
 		log.Fatal("Can't start server due to: ", err)
