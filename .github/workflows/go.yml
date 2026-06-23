@@ -22,7 +22,7 @@ jobs:
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret
-          POSTGRES_DB: project_test_kk
+          POSTGRES_DB: project_kk
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -51,7 +51,7 @@ jobs:
       
     - name: Test
       env:
-        DB_URL: postgresql://root:secret@localhost:5433/project_test_kk?sslmode=disable
+        DB_URL: postgresql://root:secret@localhost:5433/project_kk?sslmode=disable
         DB_DRIVER_NAME: postgres
       run: |
         go mod tidy
