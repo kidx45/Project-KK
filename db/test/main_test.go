@@ -14,7 +14,7 @@ import (
 var testQueries *sqlc.Queries
 var testDB *sql.DB
 func TestMain(m *testing.M) {
-	config, err := utils.LoadEnv("../../app.env")
+	config, err := utils.LoadEnv("../../.env")
 	if err != nil {
 		config = utils.Config{
 			DB_URL:         os.Getenv("DB_URL"),

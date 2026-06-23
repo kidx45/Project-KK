@@ -5,8 +5,7 @@ RETURNING *;
 
 -- name: GetTransfer :one
 SELECT * FROM transfers
-WHERE from_account_id = $1 AND to_account_id = $2 AND created_at <= $3 AND created_at >= $4
-LIMIT 1;
+WHERE from_account_id = $1 AND to_account_id = $2;
 
 -- name: ListTransfers :many
 SELECT * FROM transfers

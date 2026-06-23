@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	AppConfig, err := utils.LoadEnv("app.env")
+	AppConfig, err := utils.LoadEnv(".env")
 	if err != nil {
 		log.Fatal("Can't load data because: ", err)
 	}

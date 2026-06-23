@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"time"
 )
 
 const createTransfer = `-- name: CreateTransfer :one
@@ -37,24 +36,16 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
 
 const getTransfer = `-- name: GetTransfer :one
 SELECT id, from_account_id, to_account_id, amount, created_at FROM transfers
-WHERE from_account_id = $1 AND to_account_id = $2 AND created_at <= $3 AND created_at >= $4
-LIMIT 1
+WHERE from_account_id = $1 AND to_account_id = $2
 `
 
 type GetTransferParams struct {
-	FromAccountID int64     `json:"fromAccountId"`
-	ToAccountID   int64     `json:"toAccountId"`
-	CreatedAt     time.Time `json:"createdAt"`
-	CreatedAt_2   time.Time `json:"createdAt2"`
+	FromAccountID int64 `json:"fromAccountId"`
+	ToAccountID   int64 `json:"toAccountId"`
 }
 
 func (q *Queries) GetTransfer(ctx context.Context, arg GetTransferParams) (Transfer, error) {
-	row := q.queryRow(ctx, q.getTransferStmt, getTransfer,
-		arg.FromAccountID,
-		arg.ToAccountID,
-		arg.CreatedAt,
-		arg.CreatedAt_2,
-	)
+	row := q.queryRow(ctx, q.getTransferStmt, getTransfer, arg.FromAccountID, arg.ToAccountID)
 	var i Transfer
 	err := row.Scan(
 		&i.ID,
