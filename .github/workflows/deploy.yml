@@ -1,0 +1,33 @@
+name: Build and Push to Harbor
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Harbor
+        run: |
+          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login ${{ secrets.HARBOR_URL }} \
+            --username ${{ secrets.HARBOR_USERNAME }} \
+            --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.HARBOR_URL }}/${{ secrets.HARBOR_PROJECT }}/api:${{ github.sha }} .
+
+      - name: Push image to Harbor
+        run: |
+          docker push ${{ secrets.HARBOR_URL }}/${{ secrets.HARBOR_PROJECT }}/api:${{ github.sha }}
+          
+          # Also tag and push as latest
+          docker tag ${{ secrets.HARBOR_URL }}/${{ secrets.HARBOR_PROJECT }}/api:${{ github.sha }} \
+            ${{ secrets.HARBOR_URL }}/${{ secrets.HARBOR_PROJECT }}/api:latest
+          docker push ${{ secrets.HARBOR_URL }}/${{ secrets.HARBOR_PROJECT }}/api:latest

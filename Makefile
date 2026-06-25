@@ -22,4 +22,8 @@ test:
 	go test -v -cover -coverpkg=./... ./...
 mockgen:
 	mockgen -package=mockdb -destination=./db/mockdb/store.go github.com/kidx45/Project-KK/Backend-Team/db/sqlc Store
+dockerize:
+	sudo docker build -t project_kk:1.0 .
+dockerize-run:
+	sudo docker run --name kk --network k_network -p 8080:8080 -e GIN_MODE=release -e DB_URL="postgresql://root:secret@psql_testing:5432/project_kk?sslmode=disable" project_kk:1.0
 .PHONY: postgres createdb dropdb migrateup migratedown migrateCreate sqlc
