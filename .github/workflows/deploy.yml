@@ -13,6 +13,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create .env file from GitHub secrets
+        run: |
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "DB_DRIVER_NAME=${{ secrets.DB_DRIVER_NAME }}" >> .env
+          echo "SYMMETRIC_SECRET_KEY=${{ secrets.SYMMETRIC_SECRET_KEY }}" >> .env
+          echo "ACCESS_TOKEN_DURATION=${{ secrets.ACCESS_TOKEN_DURATION }}" >> .env
+
       - name: Login to Harbor
         run: |
           echo "${{ secrets.HARBOR_PASSWORD }}" | docker login ${{ secrets.HARBOR_URL }} \
@@ -27,7 +35,6 @@ jobs:
         run: |
           docker push ${{ secrets.HARBOR_URL }}/${{ secrets.HARBOR_PROJECT }}/api:${{ github.sha }}
           
-          # Also tag and push as latest
           docker tag ${{ secrets.HARBOR_URL }}/${{ secrets.HARBOR_PROJECT }}/api:${{ github.sha }} \
             ${{ secrets.HARBOR_URL }}/${{ secrets.HARBOR_PROJECT }}/api:latest
           docker push ${{ secrets.HARBOR_URL }}/${{ secrets.HARBOR_PROJECT }}/api:latest
