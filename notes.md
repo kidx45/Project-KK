@@ -273,3 +273,173 @@ docker run -p 8080:8080 <image-name>
 * **Command Syntax:** Run as `docker build -t my-go-app:1.0 .` where `my-go-app` is the name, `:1.0` is the version, and `.` means current folder.
 * **Version Control:** DevOps teams use it to track releases (v1.0, v1.1) and easily roll back to previous versions if a bug occurs.
 * **Cloud Deployment:** Required by platforms like AWS, Google Cloud, or Docker Hub to match their registry format before pushing code.
+
+# Docker, localhost, 0.0.0.0, and CORS
+
+## Docker Mental Model
+
+Think of a Docker container as a **separate computer** from your host machine.
+
+* Host machine → Postman, Browser, Thunder Client
+* Container → Go/Gin application
+
+## Why `localhost` Fails
+
+If your app listens on:
+
+```go
+r.Run("localhost:8080")
+```
+
+it only accepts connections from inside the container.
+
+Even if Docker forwards traffic, the app won't accept requests coming from outside the container.
+
+## Why `0.0.0.0` Works
+
+Use:
+
+```go
+r.Run("0.0.0.0:8080")
+```
+
+This tells the app to listen on all network interfaces, allowing Docker to forward requests successfully.
+
+## CORS vs Networking
+
+### Networking (Current Issue)
+
+Controls whether requests can reach the application.
+
+Fix:
+
+```go
+r.Run("0.0.0.0:8080")
+```
+
+### CORS
+
+Controls whether a **browser** allows a frontend to access a backend.
+
+Example:
+
+```http
+Access-Control-Allow-Origin: http://localhost:3000
+```
+
+CORS only applies to browsers.
+
+## Important
+
+* Postman and Thunder Client do **not** enforce CORS.
+* If requests can't reach the app, CORS is irrelevant.
+* Your current issue is a Docker/networking problem, not a CORS problem.
+
+## After Changing the Code
+
+Rebuild the container:
+
+```bash
+sudo docker compose down
+sudo docker compose up --build
+```
+
+## Summary
+
+* `localhost` = listen only inside the container.
+* `0.0.0.0` = allow Docker and external clients to connect.
+* CORS = browser security for cross-origin requests.
+* Docker networking must work before CORS even matters.
+
+# Docker `EXPOSE` and Multi-Stage Builds
+
+## Why Use `EXPOSE 8080`?
+
+`EXPOSE` does **not** publish a port to your host machine. Port publishing is done with:
+
+```bash
+docker run -p 8080:8080 my-image
+```
+
+or in Docker Compose:
+
+```yaml
+ports:
+  - "8080:8080"
+```
+
+### Why Use `EXPOSE` Then?
+
+#### 1. Machine-Readable Documentation
+
+Unlike comments, tools and cloud platforms can read `EXPOSE` metadata and understand which port the application uses.
+
+```dockerfile
+EXPOSE 8080
+```
+
+#### 2. Automatic Port Mapping
+
+When running:
+
+```bash
+docker run -P my-image
+```
+
+Docker reads the `EXPOSE` instruction and automatically maps the exposed port to a random available host port.
+
+## Multi-Stage Builds
+
+### Stage 1: Builder
+
+```dockerfile
+FROM golang:1.24 AS builder
+```
+
+This stage contains:
+
+* Go compiler
+* Build tools
+* Dependencies
+* Source code
+
+Its job is to compile the application into a binary.
+
+### Stage 2: Production Image
+
+```dockerfile
+FROM alpine:latest
+```
+
+Docker starts with a fresh minimal image and copies only the files needed to run the application:
+
+```dockerfile
+COPY --from=builder /app/main .
+COPY --from=builder /app/.env .
+```
+
+### What Happens to the Builder?
+
+The builder stage is not included in the final image.
+
+After the build:
+
+* Source code is discarded
+* Go compiler is discarded
+* Build caches are discarded
+* Only the final Alpine image remains
+
+## Benefits
+
+* Smaller image size
+* Faster deployments
+* Better security
+* Fewer unnecessary files in production
+
+## Summary
+
+* `EXPOSE` documents container ports and enables Docker automation.
+* `EXPOSE` does not publish ports.
+* Multi-stage builds use a temporary builder image to compile code.
+* Only the final stage is included in the production image.
+* The builder stage is discarded after the build completes.
