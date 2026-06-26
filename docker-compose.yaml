@@ -7,6 +7,13 @@ services:
       - POSTGRES_DB=project_kk
     ports:
       - "5432:5432"
+    # 🔑 THE NEW HEALTHCHECK:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d project_kk"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
   api:
     build:
       context: .
@@ -19,9 +26,10 @@ services:
       - DB_DRIVER_NAME=postgres
       - SYMMETRIC_SECRET_KEY=12345678901234567890123456789012
       - ACCESS_TOKEN_DURATION=15m
-
+    # 🚀 UPDATED: Tells Docker to wait specifically for the health condition
     depends_on:
-      - postgres
-    entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
+      postgres:
+        condition: service_healthy
+    # 🧹 CLEANED UP: You can safely drop the wait-for.sh script wrapper!
+    entrypoint: ["/app/start.sh"]
     command: ["./main"]
-        
