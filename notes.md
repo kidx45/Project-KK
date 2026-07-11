@@ -443,3 +443,185 @@ After the build:
 * Multi-stage builds use a temporary builder image to compile code.
 * Only the final stage is included in the production image.
 * The builder stage is discarded after the build completes.
+
+### 1. Docker Compose Healthcheck Format
+
+The `healthcheck` block in a `compose.yaml` file is a native way to monitor a container's internal status before letting other services connect to it. It uses a **`CMD-SHELL`** configuration to execute internal container commands—like running `pg_isready` inside a PostgreSQL database—to see if the service is fully booted and accepting connections. By tuning the **`interval`** (how often to check), **`timeout`** (how long to wait before failing a check), and **`retries`** (allowable consecutive failures), you can cleanly pause dependent apps like your Go API using `condition: service_healthy` under `depends_on`, removing the need for clunky external shell waiting scripts.
+
+---
+
+### 2. The Password Pipe Symbol (`|`) and Caching
+
+In a GitHub Actions pipeline, the Linux pipe symbol (`|`) acts as a secure data bridge. In a command like `echo "${{ secrets.HARBOR_PASSWORD }}" | docker login...`, the pipe grabs the password printed dynamically from your encrypted vault and instantly streams it straight into the standard input of the `docker login` command without printing it into the build logs. Once authenticated, Docker caches a temporary session token inside a hidden config file (`~/.docker/config.json`) on the virtual runner machine, which allows all subsequent `docker push` commands to automatically verify your upload permissions to Harbor without asking for the password again.
+
+---
+
+### 3. Error 255 and the Shebang (`#!/bin/sh`) Solution
+
+When a container crashes with **`exit code 255`** and an `exec format error`, it means the Linux operating system inside the container tried to execute a file it couldn't understand. This happens when a plain text script like `start.sh` is missing its **shebang (`#!/bin/sh`)** on the very first line, which tricks the Alpine Linux kernel into thinking the text file is a compiled machine binary. Adding `#!/bin/sh` explicitly tells the container's minimal OS to parse the file using its built-in command shell interpreter; ensuring this line is present, alongside changing the file's line endings from Windows `CRLF` to Linux `LF`, completely resolves the crash.
+
+# gRPC vs. REST vs. WebSockets: Performance & Use Cases
+
+---
+
+## 1. Serialization
+   Feature          | REST (JSON/XML)       | gRPC (Protobuf)       |
+ |------------------|-----------------------|-----------------------|
+ | **Format**       | Text-based            | Binary                |
+ | **Size**         | Larger (human-readable)| Compact               |
+ | **Speed**        | Slower (parsing text) | Faster (binary)       |
+ | **Language**     | Agnostic              | Agnostic (code-gen)   |
+
+- **REST**: Uses JSON/XML, which are text-based and require parsing.
+- **gRPC**: Uses Protocol Buffers (binary), which are smaller and faster to serialize/deserialize.
+
+---
+
+## 2. Protocol
+ | Feature          | REST (HTTP/1.1) | gRPC (HTTP/2)         | WebSockets (TCP)      |
+ |------------------|-----------------|-----------------------|-----------------------|
+ | **Multiplexing** | ❌ No           | ✅ Yes                | ✅ Yes                |
+ | **Connection**   | 1 per request   | 1 for all requests    | 1 persistent          |
+ | **Header**       | Text-based      | Compressed            | Minimal               |
+ | **Latency**      | Higher          | Lower                 | Lowest                |
+
+- **REST**: Typically uses HTTP/1.1 (text-based, no multiplexing).
+- **gRPC**: Uses HTTP/2 (binary framing, multiplexing, header compression).
+- **WebSockets**: Uses a persistent TCP connection for full-duplex communication.
+
+---
+## 3. Latency
+- **REST**:
+  - Text parsing adds overhead.
+  - Each request/response is independent (higher latency).
+- **gRPC**:
+  - Binary serialization reduces parsing time.
+  - HTTP/2 multiplexing allows parallel requests on a single connection.
+- **WebSockets**:
+  - No HTTP overhead; messages are sent/received instantly over a persistent connection.
+
+---
+## 4. gRPC Types
+1. **Unary RPC**: 1 request → 1 response.
+2. **Server Streaming RPC**: 1 request → stream of responses.
+3. **Client Streaming RPC**: Stream of requests → 1 response.
+4. **Bidirectional Streaming RPC**: Stream of requests ↔ stream of responses.
+
+---
+## 5. Use Cases
+
+### gRPC
+ | Scenario               | Fit                          | Notes                          |
+ |------------------------|------------------------------|--------------------------------|
+ | **Internal Services**  | ✅ Ideal (low latency)        | Backend-to-backend communication |
+ | **Public APIs**        | ❌ Complex for browsers        | Requires gRPC-Web/Envoy        |
+ | **Real-Time**          | ✅ Bidirectional streaming    | Best for internal systems      |
+ | **Polyglot Systems**  | ✅ Language-agnostic          | Protobuf code generation       |
+ | **Payment Systems**    | ✅ Fast, reliable             | Efficient binary serialization  |
+
+### REST
+ | Scenario               | Fit                          | Notes                          |
+ |------------------------|------------------------------|--------------------------------|
+ | **Public APIs**        | ✅ Ideal (simple, debuggable) | Browser-friendly               |
+ | **Statelessness**      | ✅ Ideal                      | Cacheable, scalable            |
+ | **Internal Services**  | ⚠️ Works but less efficient  | Higher latency than gRPC       |
+
+### WebSockets
+ | Scenario               | Fit                          | Notes                          |
+ |------------------------|------------------------------|--------------------------------|
+ | **Real-Time Apps**     | ✅ Ideal (chat, gaming)       | Full-duplex, persistent         |
+ | **Browser Support**    | ✅ Native                     | No proxies needed              |
+ | **Backend-to-Backend** | ⚠️ Possible but less structured| No built-in serialization       |
+ | **Structured Data**    | ❌ Manual handling            | Use JSON or custom formats     |
+
+---
+## 6. Hybrid Approach
+- **Frontend ↔ Backend**: Use **WebSockets** for real-time communication (e.g., chat apps).
+- **Backend ↔ Microservices**: Use **gRPC bidirectional streaming** for efficient, typed communication between services.# gRPC vs. REST vs. WebSockets: Performance & Use Cases
+
+---
+
+## 1. Serialization
+   Feature          | REST (JSON/XML)       | gRPC (Protobuf)       |
+ |------------------|-----------------------|-----------------------|
+ | **Format**       | Text-based            | Binary                |
+ | **Size**         | Larger (human-readable)| Compact               |
+ | **Speed**        | Slower (parsing text) | Faster (binary)       |
+ | **Language**     | Agnostic              | Agnostic (code-gen)   |
+
+- **REST**: Uses JSON/XML, which are text-based and require parsing.
+- **gRPC**: Uses Protocol Buffers (binary), which are smaller and faster to serialize/deserialize.
+
+---
+
+## 2. Protocol
+ | Feature          | REST (HTTP/1.1) | gRPC (HTTP/2)         | WebSockets (TCP)      |
+ |------------------|-----------------|-----------------------|-----------------------|
+ | **Multiplexing** | ❌ No           | ✅ Yes                | ✅ Yes                |
+ | **Connection**   | 1 per request   | 1 for all requests    | 1 persistent          |
+ | **Header**       | Text-based      | Compressed            | Minimal               |
+ | **Latency**      | Higher          | Lower                 | Lowest                |
+
+- **REST**: Typically uses HTTP/1.1 (text-based, no multiplexing).
+- **gRPC**: Uses HTTP/2 (binary framing, multiplexing, header compression).
+- **WebSockets**: Uses a persistent TCP connection for full-duplex communication.
+
+---
+## 3. Latency
+- **REST**:
+  - Text parsing adds overhead.
+  - Each request/response is independent (higher latency).
+- **gRPC**:
+  - Binary serialization reduces parsing time.
+  - HTTP/2 multiplexing allows parallel requests on a single connection.
+- **WebSockets**:
+  - No HTTP overhead; messages are sent/received instantly over a persistent connection.
+
+---
+## 4. gRPC Types
+1. **Unary RPC**: 1 request → 1 response.
+2. **Server Streaming RPC**: 1 request → stream of responses.
+3. **Client Streaming RPC**: Stream of requests → 1 response.
+4. **Bidirectional Streaming RPC**: Stream of requests ↔ stream of responses.
+
+---
+## 5. Use Cases
+
+### gRPC
+ | Scenario               | Fit                          | Notes                          |
+ |------------------------|------------------------------|--------------------------------|
+ | **Internal Services**  | ✅ Ideal (low latency)        | Backend-to-backend communication |
+ | **Public APIs**        | ❌ Complex for browsers        | Requires gRPC-Web/Envoy        |
+ | **Real-Time**          | ✅ Bidirectional streaming    | Best for internal systems      |
+ | **Polyglot Systems**  | ✅ Language-agnostic          | Protobuf code generation       |
+ | **Payment Systems**    | ✅ Fast, reliable             | Efficient binary serialization  |
+
+### REST
+ | Scenario               | Fit                          | Notes                          |
+ |------------------------|------------------------------|--------------------------------|
+ | **Public APIs**        | ✅ Ideal (simple, debuggable) | Browser-friendly               |
+ | **Statelessness**      | ✅ Ideal                      | Cacheable, scalable            |
+ | **Internal Services**  | ⚠️ Works but less efficient  | Higher latency than gRPC       |
+
+### WebSockets
+ | Scenario               | Fit                          | Notes                          |
+ |------------------------|------------------------------|--------------------------------|
+ | **Real-Time Apps**     | ✅ Ideal (chat, gaming)       | Full-duplex, persistent         |
+ | **Browser Support**    | ✅ Native                     | No proxies needed              |
+ | **Backend-to-Backend** | ⚠️ Possible but less structured| No built-in serialization       |
+ | **Structured Data**    | ❌ Manual handling            | Use JSON or custom formats     |
+
+---
+## 6. Hybrid Approach
+- **Frontend ↔ Backend**: Use **WebSockets** for real-time communication (e.g., chat apps).
+- **Backend ↔ Microservices**: Use **gRPC bidirectional streaming** for efficient, typed communication between services.
+Here’s the concise summary:
+
+---
+
+**gRPC Forward Compatibility in Go**
+- The `ProjectKKServer` **interface** defines a contract (methods like `CreateUser`, `LoginUser`) that server structs must implement.
+- **`mustEmbedUnimplementedProjectKKServer()`** enforces embedding `UnimplementedProjectKKServer` in your struct.
+- **Why?** `UnimplementedProjectKKServer` provides **default (no-op) implementations** for all interface methods.
+- **Result**: If the `.proto` file adds new methods, your struct **automatically inherits default implementations**, preventing compilation errors.
+- **Key Benefit**: You can update `.proto` files **without breaking existing server code**.

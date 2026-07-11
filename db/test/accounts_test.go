@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	sqlc "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
-	utils "github.com/kidx45/Project-KK/Backend-Team/utils"
+	sqlc "github.com/kidx45/Project-KK/db/sqlc"
+	utils "github.com/kidx45/Project-KK/utils"
 )
 
 func createRandomAccount(t *testing.T) sqlc.Account {

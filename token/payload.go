@@ -28,7 +28,7 @@ func NewPayload(username string, duration time.Duration) (*Payload, error) {
 
 func (p *Payload) Valid() error{
 	if time.Now().After(p.ExpiredAt) {
-		return errors.New("Invalid Payload")
+		return errors.New("it is a expired")
 	}
 	return nil
 }

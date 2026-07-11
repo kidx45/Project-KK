@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kidx45/Project-KK/Backend-Team/api"
-	"github.com/kidx45/Project-KK/Backend-Team/token"
+	"github.com/kidx45/Project-KK/api"
+	"github.com/kidx45/Project-KK/token"
 	"github.com/stretchr/testify/require"
 )
 
 func addAuthorization(t *testing.T, request *http.Request, tokenMaker token.Maker, authorizationType string, username string, duration time.Duration) {
-	token, err := tokenMaker.CreateToken(username, duration)
+	token, _, err := tokenMaker.CreateToken(username, duration)
 	require.NoError(t, err)
 
 	request.Header.Set("Authorization", fmt.Sprintf("%s %s", authorizationType, token))

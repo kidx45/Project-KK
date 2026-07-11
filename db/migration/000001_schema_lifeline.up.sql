@@ -1,4 +1,4 @@
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
   "id" bigserial PRIMARY KEY,
   "username" varchar UNIQUE NOT NULL,
   "hashed_password" varchar NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE "users" (
   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "accounts" (
+CREATE TABLE IF NOT EXISTS "accounts" (
   "id" bigserial PRIMARY KEY,
   "username" varchar NOT NULL,
   "balance" bigint NOT NULL,
@@ -19,14 +19,14 @@ CREATE TABLE "accounts" (
   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "entries" (
+CREATE TABLE IF NOT EXISTS "entries" (
   "id" bigserial PRIMARY KEY,
   "account_id" bigint NOT NULL,
   "amount" bigint NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "transfers" (
+CREATE TABLE IF NOT EXISTS "transfers" (
   "id" bigserial PRIMARY KEY,
   "from_account_id" bigint NOT NULL,
   "to_account_id" bigint NOT NULL,

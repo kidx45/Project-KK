@@ -13,13 +13,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
-	"github.com/kidx45/Project-KK/Backend-Team/db/mockdb"
-	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
-	"github.com/kidx45/Project-KK/Backend-Team/token"
-	"github.com/kidx45/Project-KK/Backend-Team/utils"
+	"github.com/kidx45/Project-KK/db/mockdb"
+	db "github.com/kidx45/Project-KK/db/sqlc"
+	"github.com/kidx45/Project-KK/token"
+	"github.com/kidx45/Project-KK/utils"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func randomUser(t *testing.T) (db.User, string) {

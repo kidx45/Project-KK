@@ -6,7 +6,7 @@ import (
 	"log"
 	"testing"
 
-	sqlc "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
+	sqlc "github.com/kidx45/Project-KK/db/sqlc"
 	"github.com/stretchr/testify/require"
 )
 

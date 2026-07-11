@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kidx45/Project-KK/Backend-Team/api"
-	"github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
-	"github.com/kidx45/Project-KK/Backend-Team/utils"
+	"github.com/kidx45/Project-KK/api"
+	db "github.com/kidx45/Project-KK/db/sqlc"
+	"github.com/kidx45/Project-KK/utils"
 	"github.com/stretchr/testify/require"
 )
 

@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
-	"github.com/kidx45/Project-KK/Backend-Team/token"
-	"github.com/kidx45/Project-KK/Backend-Team/utils"
+	db "github.com/kidx45/Project-KK/db/sqlc"
+	"github.com/kidx45/Project-KK/token"
+	"github.com/kidx45/Project-KK/utils"
 )
 
 type Server struct {
@@ -30,6 +30,7 @@ func NewServer(config utils.Config, store db.Store) (*Server, error) {
 	}
 	router.POST("/user", server.CreateUser)
 	router.POST("/user/login", server.LoginUser)
+	router.POST("refresh", server.Renew)
 
 	authroutes := router.Group("/").Use(AuthMiddleware(server.Token))
 	router.GET("/users", server.ListUsers)

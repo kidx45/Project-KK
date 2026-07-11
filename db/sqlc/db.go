@@ -33,6 +33,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createEntryStmt, err = db.PrepareContext(ctx, createEntry); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateEntry: %w", err)
 	}
+	if q.createSessionStmt, err = db.PrepareContext(ctx, createSession); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateSession: %w", err)
+	}
 	if q.createTransferStmt, err = db.PrepareContext(ctx, createTransfer); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateTransfer: %w", err)
 	}
@@ -59,6 +62,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getEntryStmt, err = db.PrepareContext(ctx, getEntry); err != nil {
 		return nil, fmt.Errorf("error preparing query GetEntry: %w", err)
+	}
+	if q.getSessionByIdStmt, err = db.PrepareContext(ctx, getSessionById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetSessionById: %w", err)
+	}
+	if q.getSessionByUsernameStmt, err = db.PrepareContext(ctx, getSessionByUsername); err != nil {
+		return nil, fmt.Errorf("error preparing query GetSessionByUsername: %w", err)
 	}
 	if q.getTransferStmt, err = db.PrepareContext(ctx, getTransfer); err != nil {
 		return nil, fmt.Errorf("error preparing query GetTransfer: %w", err)
@@ -116,6 +125,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createEntryStmt: %w", cerr)
 		}
 	}
+	if q.createSessionStmt != nil {
+		if cerr := q.createSessionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createSessionStmt: %w", cerr)
+		}
+	}
 	if q.createTransferStmt != nil {
 		if cerr := q.createTransferStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createTransferStmt: %w", cerr)
@@ -159,6 +173,16 @@ func (q *Queries) Close() error {
 	if q.getEntryStmt != nil {
 		if cerr := q.getEntryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getEntryStmt: %w", cerr)
+		}
+	}
+	if q.getSessionByIdStmt != nil {
+		if cerr := q.getSessionByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getSessionByIdStmt: %w", cerr)
+		}
+	}
+	if q.getSessionByUsernameStmt != nil {
+		if cerr := q.getSessionByUsernameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getSessionByUsernameStmt: %w", cerr)
 		}
 	}
 	if q.getTransferStmt != nil {
@@ -263,6 +287,7 @@ type Queries struct {
 	addMoneyIntoAccountStmt     *sql.Stmt
 	createAccountStmt           *sql.Stmt
 	createEntryStmt             *sql.Stmt
+	createSessionStmt           *sql.Stmt
 	createTransferStmt          *sql.Stmt
 	createUserStmt              *sql.Stmt
 	deleteAccountStmt           *sql.Stmt
@@ -272,6 +297,8 @@ type Queries struct {
 	getAccountByIdForUpdateStmt *sql.Stmt
 	getAccountByUsernameStmt    *sql.Stmt
 	getEntryStmt                *sql.Stmt
+	getSessionByIdStmt          *sql.Stmt
+	getSessionByUsernameStmt    *sql.Stmt
 	getTransferStmt             *sql.Stmt
 	getUserStmt                 *sql.Stmt
 	listAccountsStmt            *sql.Stmt
@@ -293,6 +320,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		addMoneyIntoAccountStmt:     q.addMoneyIntoAccountStmt,
 		createAccountStmt:           q.createAccountStmt,
 		createEntryStmt:             q.createEntryStmt,
+		createSessionStmt:           q.createSessionStmt,
 		createTransferStmt:          q.createTransferStmt,
 		createUserStmt:              q.createUserStmt,
 		deleteAccountStmt:           q.deleteAccountStmt,
@@ -302,6 +330,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getAccountByIdForUpdateStmt: q.getAccountByIdForUpdateStmt,
 		getAccountByUsernameStmt:    q.getAccountByUsernameStmt,
 		getEntryStmt:                q.getEntryStmt,
+		getSessionByIdStmt:          q.getSessionByIdStmt,
+		getSessionByUsernameStmt:    q.getSessionByUsernameStmt,
 		getTransferStmt:             q.getTransferStmt,
 		getUserStmt:                 q.getUserStmt,
 		listAccountsStmt:            q.listAccountsStmt,

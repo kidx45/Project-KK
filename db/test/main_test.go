@@ -6,13 +6,14 @@ import (
 	"os"
 	"testing"
 
+	sqlc "github.com/kidx45/Project-KK/db/sqlc"
+	utils "github.com/kidx45/Project-KK/utils"
 	_ "github.com/lib/pq"
-	sqlc "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
-	utils "github.com/kidx45/Project-KK/Backend-Team/utils"
 )
 
 var testQueries *sqlc.Queries
 var testDB *sql.DB
+
 func TestMain(m *testing.M) {
 	config, err := utils.LoadEnv("../../.env")
 	if err != nil {

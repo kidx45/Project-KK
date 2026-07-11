@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/kidx45/Project-KK/pb";
+
+message User {
+    string user_name = 1;
+    string email = 2;
+    string full_name = 3;
+    string phone_number = 4;
+    google.protobuf.Timestamp created_at = 5;
+}
+
+// saving memory when using 1-15, will use only 1 byte
+// type User struct {
+//     ID                    int64     `json:"id"`
+//     Username              string    `json:"username"`
+//     HashedPassword        string    `json:"hashedPassword"`
+//     FullName              string    `json:"fullName"`
+//     Email                 string    `json:"email"`
+//     PhoneNumber           string    `json:"phoneNumber"`
+//     IsEmailVerified       bool      `json:"isEmailVerified"`
+//     IsPhoneNumberVerified bool      `json:"isPhoneNumberVerified"`
+//     PasswordChangedAt     time.Time `json:"passwordChangedAt"`
+//     CreatedAt             time.Time `json:"createdAt"`
+// }

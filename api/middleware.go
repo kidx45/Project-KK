@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kidx45/Project-KK/Backend-Team/token"
+	"github.com/kidx45/Project-KK/token"
 )
 
 func AuthMiddleware(tokenMaker token.Maker) gin.HandlerFunc {

@@ -12,7 +12,6 @@ COPY --from=builder /app/main .
 COPY --from=builder /app/migrate ./migrate
 COPY --from=builder /app/db/migration ./migration
 COPY --from=builder /app/start.sh ./start.sh
-COPY --from=builder /app/wait-for.sh ./wait-for.sh
 
 EXPOSE 8080
 CMD ["./main"]

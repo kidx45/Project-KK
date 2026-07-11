@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
-	"github.com/kidx45/Project-KK/Backend-Team/token"
+	db "github.com/kidx45/Project-KK/db/sqlc"
+	"github.com/kidx45/Project-KK/token"
 )
 
 type CreateTransferRequest struct {

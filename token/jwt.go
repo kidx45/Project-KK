@@ -21,14 +21,19 @@ func NewJWTToken (secretKey string) (Maker,error) {
 	return &JWTMaker{secretKey: secretKey},nil
 }
 
-func (j *JWTMaker) CreateToken(username string, duration time.Duration) (string, error) {
+func (j *JWTMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {
 	payload, err := NewPayload(username,duration)
 	if err != nil {
-		return "", fmt.Errorf("cant't create token %s",err)
+		return "", payload, fmt.Errorf("cant't create token %s",err)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,payload)
-	return token.SignedString([]byte(j.secretKey))
+	tokenString, err := token.SignedString([]byte(j.secretKey))
+	if err != nil {
+		return "", payload, fmt.Errorf("cant't create token %s",err)
+	}
+	
+	return tokenString, payload, nil
 }
 func (j *JWTMaker) VerifyToken(token string) (*Payload, error) {
 	keyFunc := func(token *jwt.Token) (interface{},error){

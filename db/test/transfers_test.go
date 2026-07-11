@@ -4,17 +4,17 @@ import (
 	"context"
 	"testing"
 
-	db "github.com/kidx45/Project-KK/Backend-Team/db/sqlc"
-	"github.com/kidx45/Project-KK/Backend-Team/utils"
+	db "github.com/kidx45/Project-KK/db/sqlc"
+	"github.com/kidx45/Project-KK/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func createRandomTransfer(t *testing.T, account1 db.Account, account2 db.Account) (db.Transfer, error) {
-	
+
 	transfer, err := testQueries.CreateTransfer(context.Background(), db.CreateTransferParams{
 		FromAccountID: account1.ID,
 		ToAccountID:   account2.ID,
-		Amount:        utils.RandomInt(10,10),
+		Amount:        utils.RandomInt(10, 10),
 	})
 	return transfer, err
 }
